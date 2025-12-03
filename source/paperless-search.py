@@ -1,7 +1,7 @@
 import paperless
 import lexoffice
+import lexware_playwright
 import os
-import sys
 import asyncio
 
 # Config
@@ -17,6 +17,9 @@ lexoffice_tag_id = os.getenv('PL2LO_LEXOFFICE_TAG_ID')
 # lexoffice
 lexoffice_token = os.getenv('PL2LO_LEXOFFICE_TOKEN')
 lexoffice_url = os.getenv('PL2LO_LEXOFFICE_URL')
+upload_provider = os.getenv('PL2LO_UPLOAD_PROVIDER', 'lexware_api')
+lexware_username = os.getenv('PL2LO_LEXWARE_USERNAME')
+lexware_password = os.getenv('PL2LO_LEXWARE_PASSWORD')
 
 # Helper files and directories
 tmp_dir = "tmp"
@@ -47,6 +50,7 @@ async def sync_paperless_to_lexoffice():
     try:
         # Your main script logic here
         print("Check for new documents in paperless-ngx tagged for upload...")
+        print(f"Using upload provider: {upload_provider}")
         #document_ids = paperless.search_documents(paperless_token, paperless_url, search_string)
         document_ids = paperless.filter_documents_by_tags(paperless_token, paperless_url, [inbox_tag_id, lexoffice_tag_id])
 
@@ -62,8 +66,16 @@ async def sync_paperless_to_lexoffice():
                 with open(filepath, "wb") as file:
                     file.write(file_content)
 
-                # Upload PDF to lexoffice
-                response = lexoffice.upload_voucher(lexoffice_token, lexoffice_url, filepath)
+                # Upload PDF to lexoffice or lexware depending on env
+                if upload_provider == 'playwright':
+                    try:
+                        response = await lexware_playwright.upload_voucher(lexware_username, lexware_password, filepath)
+                    except Exception as e:
+                        # If Playwright raised a DocumentUploadError or other error, treat as upload failed
+                        print(f"Upload via lexware_playwright failed: {e}")
+                        response = None
+                else:
+                    response = lexoffice.upload_voucher(lexoffice_token, lexoffice_url, filepath)
 
                 # Upload successful
                 if response.status_code == 202:

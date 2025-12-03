@@ -12,6 +12,20 @@ You need to prepare some information so that paperless-to-lexoffice is able to c
 - Create one tag in paperless-ngx that indicates that something needs to be done with this document (if not already existing, like e.g., Inbox tag). I am using my "Inbox" tag, but you can create a separate one just for lexoffice inbox if you like.
 - Create one tag in paperless-ngx that is used for marking documents that shall be synced with lexoffice (I am using the tag "lexoffice")
 
+## Playwright UI options
+
+Alternatively to using the lexoffice Public API, you can also use the lexware Playwright UI uploader to upload documents to lexoffice via browser automation.
+
+This has the advantage that no special lexoffice plan is required, but the disadvantage that the docker image becomes much larger (because of the Playwright browsers) and that the upload process is slower and more error-prone (because of possible UI changes on lexoffice side).
+
+to activate this option, modify the docker-compose.yml to use the Dockerfile.playwright as dockerfile in the build section (this is already prepared in the provided docker-compose.yml).
+
+also define the lexware username (email address) and password in the .env file and activate the PL2LO_LEXWARE_PASSWORD variable with value "playwright".
+
+### Upload script only
+
+The script lexware_playwright.py can also be used standalone to upload documents to lexoffice via the Playwright UI automation.
+
 ## Installation
 
 To install paperless-to-lexoffice, you can use the provided docker-compose files in the docker directory.

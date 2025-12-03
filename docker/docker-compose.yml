@@ -1,8 +1,13 @@
-version: '3'
 services:
   daemon:
-    image: stefanlachner/paperless-to-lexoffice:latest
+    image: ghcr.io/perlenjaeger/paperless-to-lexoffice:latest
+    build:
+      context: ../
+      # for lexware api
+      # dockerfile: Dockerfile
+      # big playwright image necessary without api access
+      dockerfile: Dockerfile.playwright
     container_name: paperless-to-lexoffice
     env_file:
-      - docker-compose.env
+      - .env
     restart: unless-stopped
